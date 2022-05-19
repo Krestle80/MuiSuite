@@ -6,7 +6,7 @@ import Toolbar from '@mui/material/Toolbar';
 import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
-import { yellow, red, lightBlue, orange, deepPurple, green, blueGrey, blue} from '@mui/material/colors';
+import { yellow, red, lightBlue, orange, deepOrange, deepPurple, green, blueGrey, blue} from '@mui/material/colors';
 
 let YellowButton = styled(MenuItem)(({theme}) => ({
     color: theme.palette.getContrastText(yellow[600]),
@@ -31,9 +31,9 @@ let RedButton = styled(MenuItem)(({theme}) => ({
 }))
 let OrangeButton = styled(MenuItem)(({theme}) => ({
     color: theme.palette.getContrastText(orange[500]),
-    backgroundColor: orange[500],
+    backgroundColor: deepOrange[500],
     '&:hover': {
-        backgroundColor:orange[800]
+        backgroundColor:deepOrange[800]
     }
 }))
 let GreenButton = styled(MenuItem)(({theme}) =>({

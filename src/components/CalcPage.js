@@ -7,9 +7,14 @@ import Button from '@mui/material/Button'
 import ButtonGroup from '@mui/material/ButtonGroup'
 import CalculatorButton from './CalculatorButton'
 import {useState} from 'react'
-import { Typography } from '@mui/material';
-
+import Alert from '@mui/material/Alert';
+import Collapse from '@mui/material/Collapse';
+import CloseIcon from '@mui/icons-material/Close';
+import IconButton from '@mui/material/IconButton';
 let CalcPage = ()=>{
+    //hook for error alert
+    const [open, setOpen] = React.useState(false);
+    //hooks for keeping track of the calculator
     const [calc, setCalc] = useState({
         sign:"",
         display:"0",
@@ -18,7 +23,6 @@ let CalcPage = ()=>{
     })
     //adds numbers to the display
     const addIntegerToCalc = (name) =>{
-        console.log(name)
         setCalc({
             ...calc,
             value: calc.value === 0 && name === '0' 
@@ -39,6 +43,7 @@ let CalcPage = ()=>{
     }
     //handles Pi and e respectively
     const addSpecialInt = (name) =>{
+        // first if/else adds it to the first value inputed example 4e + 4
         if(calc.value){
             if(name === "e"){
                 let initialValue = calc.value
@@ -60,6 +65,7 @@ let CalcPage = ()=>{
             }
 
         } 
+        //second if/else adds it to the second value example 4 + 4e
         else if( name === "e"){
             setCalc({
                 ...calc,
@@ -77,17 +83,20 @@ let CalcPage = ()=>{
     }
     //needed two functions for dealing with operations with one or two values required
     const handleSignsSingle = (name) =>{
-        if(calc.value){
+        
+        if(calc.value === 0){
+            setOpen(true)
+        }
         const math = (a, sign) =>
                 sign === "^2" 
                 ? a * a 
                 : sign === "sqrt"
                 ? Math.sqrt(a)
-                : sign === "sin"
+                : sign === "sin(x)"
                 ? Math.sin(a)
-                : sign === "cos"
+                : sign === "cos(x)"
                 ? Math.cos(a)
-                : sign === "tan"
+                : sign === "tan(x)"
                 ? Math.tan(a) 
                 : sign === "Log10"
                 ? Math.log10(a)
@@ -100,16 +109,52 @@ let CalcPage = ()=>{
                     display: answer,
                     value: answer
                 })
-        }
+        
     }
     const handleSignsMultiple = (name) =>{
-        setCalc({
-            ...calc,
-            sign: calc.value === 0 ? "" : name,
-            display: calc.display + name,
-            res: !calc.res && calc.value ?  calc.value: calc.res,
-            value : !calc.res && calc.value ? 0 : calc.value
-        })
+        if(calc.value  && !calc.res){
+            setCalc({
+                ...calc,
+                sign: name,
+                display: calc.display + name,
+                res: calc.value,
+                value: 0
+            })
+            
+            console.log(calc)
+        }
+        else if(calc.value && calc.res){
+            console.log(calc)
+            const math = (a,b,sign) => 
+                sign === '+' 
+                ? a + b 
+                : sign === '-' 
+                ? a - b 
+                : sign === '*'
+                ? a * b 
+                : sign === '/'
+                ? a / b 
+                :sign === "^y"
+                ? Math.pow(a, b)
+                : Math.pow(a, (1/b));
+            
+            let answer =  math(Number(calc.res),Number(calc.value),calc.sign);
+            console.log(answer);
+            setCalc({
+                sign: name,
+                display: answer + name,
+                res: answer,
+                value : 0
+            })
+            console.log(calc)
+        }
+        else if(calc.sign != name){
+            setCalc({
+                ...calc, 
+                sign: name,
+                display: calc.res + name
+            })
+        }
     }
     const clear = () =>{
         setCalc({
@@ -120,6 +165,7 @@ let CalcPage = ()=>{
         })
     }
     const equals = () =>{
+        console.log(calc)
         if( calc.value && calc.sign){
             const math = (a,b,sign) => 
                 calc.value === "0" && calc.sign === "/"
@@ -137,7 +183,6 @@ let CalcPage = ()=>{
                 : Math.pow(a, (1/b));
             
                  let answer =  math(Number(calc.res), Number(calc.value),calc.sign)
-                 console.log(answer, Number(calc.res), Number(calc.value))
             setCalc({
                 ...calc,
                 display:answer,
@@ -146,13 +191,39 @@ let CalcPage = ()=>{
                 sign: ""
             })
         }
+        else setCalc({
+            ...calc, 
+            display:calc.value})
     }
     const props = {addIntegerToCalc, addSpecialInt, handleSignsSingle, handleSignsMultiple, clear , equals}
     const handleChange =(event) =>{
-        setCalc(event.target.value)
+        setCalc({...calc, value: event.target.value})
     }
     return(
         <Box>
+            <Box sx={{ width: '100%' }}>
+                <Collapse in={open}>
+                    <Alert
+                    action={
+                        <IconButton
+                        aria-label="close"
+                        color="inherit"
+                        size="small"
+                        onClick={() => {
+                            setOpen(false);
+                        }}
+                        >
+                        <CloseIcon fontSize="inherit" />
+                        </IconButton>
+                    }
+                    sx={{ mb: 2 }}
+                    severity= 'error'
+                    >
+                    You have to put in a number value in order to run this function
+                    </Alert>
+                </Collapse>
+
+            </Box>
             <Grid container spacing = {0}>
                 <Grid item lg={2}></Grid>
                 <Grid item lg={8}>
@@ -170,9 +241,9 @@ let CalcPage = ()=>{
                                             variant="contained"
                                             sx={{width: '100%'}}
                                     >
-                                        <CalculatorButton name = {"sin"} props = {props} />
-                                        <CalculatorButton name = "cos" props = {props}/>
-                                        <CalculatorButton name = "tan" props = {props}/>
+                                        <CalculatorButton name = {"sin(x)"} props = {props} />
+                                        <CalculatorButton name = "cos(x)" props = {props}/>
+                                        <CalculatorButton name = "tan(x)" props = {props}/>
                                         <CalculatorButton name = "Log10" props = {props}/>
                                         <CalculatorButton name = "Ln" props = {props}/>
                                     </ButtonGroup>
